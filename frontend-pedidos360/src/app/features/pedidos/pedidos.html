@@ -1,0 +1,81 @@
+<div class="page-head">
+  <div>
+    <h1>{{ auth.isAdmin() ? 'Todos los pedidos' : 'Mis pedidos' }}</h1>
+    <p>ms-pedidos filtra por el claim <code>oid</code>: un cliente ve lo suyo, un Admin ve todo.</p>
+  </div>
+  <button type="button" class="btn btn--soft" (click)="cargar()">Actualizar</button>
+</div>
+
+@if (mensaje()) { <div class="alert alert--ok" role="status">{{ mensaje() }}</div> }
+@if (error()) { <div class="alert alert--error" role="alert">{{ error() }}</div> }
+
+<div class="split">
+  <section>
+    @if (cargando()) {
+      <p class="loading">Cargando pedidos…</p>
+    } @else if (pedidos().length === 0) {
+      <div class="empty">Todavía no hay pedidos. Arma uno desde el <a routerLink="/productos">catálogo</a>.</div>
+    } @else {
+      <div class="orders">
+        @for (p of pedidos(); track p.id) {
+          <article class="order">
+            <header class="order__head">
+              <div>
+                <strong>Pedido #{{ p.id }}</strong>
+                <span class="muted"> · {{ p.fecha | date: 'dd-MM-yyyy HH:mm' }}</span>
+                @if (auth.isAdmin()) { <div class="muted">{{ p.clienteEmail || p.clienteNombre }}</div> }
+              </div>
+              <span class="order__total">{{ p.total | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</span>
+            </header>
+
+            @if (p.estado === 'CANCELADO') {
+              <span class="badge badge--CANCELADO">Cancelado</span>
+            } @else {
+              <ol class="track" [attr.aria-label]="'Estado: ' + p.estado">
+                @for (e of pasos; track e; let i = $index) {
+                  <li [class.done]="i <= indicePaso(p.estado)" [class.now]="i === indicePaso(p.estado)">{{ e.replace('_', ' ') }}</li>
+                }
+              </ol>
+            }
+
+            <ul class="lines">
+              @for (i of p.items; track i.productoId) {
+                <li>
+                  <span>{{ i.cantidad }} × {{ i.nombreProducto }}</span>
+                  <span class="muted">{{ i.subtotal | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</span>
+                </li>
+              }
+            </ul>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  <aside class="panel cart">
+    <h2>Nuevo pedido</h2>
+    @if (carrito.lineas().length === 0) {
+      <p class="muted">Agrega productos desde el catálogo para armar un pedido.</p>
+    } @else {
+      <ul class="cart__list">
+        @for (l of carrito.lineas(); track l.producto.id) {
+          <li>
+            <div>
+              <strong>{{ l.producto.nombre }}</strong>
+              <div class="muted">{{ l.producto.precio | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</div>
+            </div>
+            <div class="row">
+              <input type="number" min="0" [max]="l.producto.stock" [value]="l.cantidad" aria-label="Cantidad"
+                     (change)="carrito.cambiarCantidad(l.producto.id, cantidadDesdeEvento($event))" />
+              <button type="button" class="btn btn--soft btn--sm" (click)="carrito.quitar(l.producto.id)">✕</button>
+            </div>
+          </li>
+        }
+      </ul>
+      <p class="cart__total"><span>Total</span><strong>{{ carrito.total() | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</strong></p>
+      <button type="button" class="btn btn--block" [disabled]="enviando()" (click)="confirmar()">
+        {{ enviando() ? 'Enviando…' : 'Confirmar pedido' }}
+      </button>
+    }
+  </aside>
+</div>

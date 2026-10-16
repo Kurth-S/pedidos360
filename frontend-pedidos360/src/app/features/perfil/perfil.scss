@@ -1,0 +1,12 @@
+.id-card {
+  display: flex; gap: 20px; align-items: center; margin-bottom: 20px;
+  h2 { margin: 0; }
+  p { margin-bottom: 8px; }
+  &__avatar { flex: none; display: grid; place-items: center; width: 68px; height: 68px; border-radius: 22px;
+    background: var(--brand); color: #fff; font-size: 1.8rem; font-weight: 800; }
+}
+.tabs {
+  display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 16px; background: var(--line); border-radius: 999px;
+  button { font: inherit; font-weight: 700; padding: 8px 18px; color: var(--muted); background: transparent; border: 0; border-radius: 999px; cursor: pointer;
+    &.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); } }
+}

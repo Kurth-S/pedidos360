@@ -1,0 +1,35 @@
+<div class="page-head">
+  <div>
+    <h1>Administración</h1>
+    <p>Todos los pedidos del sistema vía <code>GET /api/bff/admin/pedidos</code>. Exige el app role Admin (403 en caso contrario).</p>
+  </div>
+</div>
+@if (error()) { <div class="alert alert--error" role="alert">{{ error() }}</div> }
+@if (pedidos(); as lista) {
+  @if (lista.length === 0) {
+    <div class="empty">Todavía no hay pedidos registrados.</div>
+  } @else {
+    <div class="resumen">
+      <div class="panel"><span class="muted">Pedidos</span><strong>{{ lista.length }}</strong></div>
+      <div class="panel"><span class="muted">Ventas acumuladas</span><strong>{{ ventas() | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</strong></div>
+    </div>
+    <section class="panel">
+      <table class="table">
+        <thead><tr><th>Pedido</th><th>Cliente</th><th>Fecha</th><th>Estado</th><th class="num">Total</th></tr></thead>
+        <tbody>
+          @for (p of lista; track p.id) {
+            <tr>
+              <td>#{{ p.id }}</td>
+              <td>{{ p.clienteEmail || p.clienteNombre }}</td>
+              <td>{{ p.fecha | date: 'dd-MM-yyyy HH:mm' }}</td>
+              <td><span class="badge badge--{{ p.estado }}">{{ p.estado.replace('_', ' ') }}</span></td>
+              <td class="num">{{ p.total | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  }
+} @else if (!error()) {
+  <p class="loading">Consultando al BFF…</p>
+}

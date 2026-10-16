@@ -1,0 +1,21 @@
+.orders { display: grid; gap: 16px; }
+.order {
+  padding: 18px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow);
+  &__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+  &__total { font-size: 1.2rem; font-weight: 800; color: var(--brand); font-variant-numeric: tabular-nums; }
+}
+.track {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; list-style: none; margin: 0 0 14px; padding: 0;
+  li { padding-top: 8px; border-top: 4px solid var(--line); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--muted);
+    &.done { border-top-color: var(--brand); color: var(--brand-dark); }
+    &.now { border-top-color: var(--accent); color: var(--accent); } }
+}
+.lines { list-style: none; margin: 0; padding: 0;
+  li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px dashed var(--line); font-size: 0.9rem; } }
+.cart {
+  position: sticky; top: 24px;
+  &__list { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 12px;
+    li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+    input { width: 60px; padding: 7px; font: inherit; background: var(--bg); border: 1.5px solid transparent; border-radius: 10px; } }
+  &__total { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.05rem; strong { font-size: 1.4rem; } }
+}

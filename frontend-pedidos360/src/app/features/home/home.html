@@ -1,0 +1,45 @@
+<section class="hero">
+  <span class="hero__kicker">Cloud Native I · DSY1107</span>
+  <h1>Tus pedidos, <span>de punta a punta</span></h1>
+  <p class="hero__text">
+    Inicia sesión con Microsoft Entra y consume el backend a través de AWS API Gateway.
+    Cada llamada viaja con tu JWT y los microservicios Spring Boot lo validan otra vez.
+  </p>
+  <div class="row">
+    @if (auth.isLoggedIn()) {
+      <a routerLink="/productos" class="btn">Ver catálogo</a>
+      <a routerLink="/perfil" class="btn btn--soft">Ver mis tokens</a>
+    } @else {
+      <button type="button" class="btn" (click)="auth.login()">Iniciar sesión o crear cuenta</button>
+    }
+  </div>
+  <ol class="flow" aria-label="Flujo de una petición">
+    <li>Entra ID</li><li>API Gateway</li><li>BFF</li><li>Microservicios</li><li>RDS MySQL</li>
+  </ol>
+</section>
+
+@if (auth.isLoggedIn()) {
+  @if (error()) { <div class="alert alert--error" role="alert">{{ error() }}</div> }
+  @if (dashboard(); as d) {
+    <section class="stats" aria-label="Resumen">
+      <article class="stat"><span class="stat__label">Productos disponibles</span><strong class="stat__value">{{ d.productosDisponibles }}</strong></article>
+      <article class="stat"><span class="stat__label">Mis pedidos</span><strong class="stat__value">{{ d.misPedidos }}</strong></article>
+      <article class="stat"><span class="stat__label">Sesión</span><strong class="stat__value stat__value--sm">{{ d.usuario.nombre }}</strong><span class="muted">{{ d.usuario.roles.join(', ') || 'Cliente' }}</span></article>
+    </section>
+    @if (d.ultimosPedidos.length > 0) {
+      <section class="panel">
+        <h2>Últimos pedidos</h2>
+        <table class="table">
+          <thead><tr><th>Pedido</th><th>Fecha</th><th class="num">Total</th></tr></thead>
+          <tbody>
+            @for (p of d.ultimosPedidos; track p.id) {
+              <tr><td>#{{ p.id }}</td><td>{{ p.fecha | date: 'dd-MM-yyyy' }}</td><td class="num">{{ p.total | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    }
+  } @else if (!error()) {
+    <p class="loading">Consultando al BFF…</p>
+  }
+}

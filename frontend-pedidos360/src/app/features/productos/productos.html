@@ -1,0 +1,72 @@
+<div class="page-head">
+  <div>
+    <h1>Catálogo</h1>
+    <p>{{ filtrados().length }} de {{ productos().length }} productos · ms-productos vía API Gateway.</p>
+  </div>
+  <div class="row">
+    <input class="buscar" type="search" placeholder="Buscar producto o categoría" aria-label="Buscar"
+           [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
+    <button type="button" class="btn btn--soft" (click)="cargar()">Actualizar</button>
+  </div>
+</div>
+
+@if (mensaje()) { <div class="alert alert--ok" role="status">{{ mensaje() }}</div> }
+@if (error()) { <div class="alert alert--error" role="alert">{{ error() }}</div> }
+
+<div [class.split]="auth.isAdmin()">
+  <section>
+    @if (cargando()) {
+      <p class="loading">Cargando productos…</p>
+    } @else if (filtrados().length === 0) {
+      <div class="empty">{{ productos().length === 0 ? 'Aún no hay productos. Un Admin puede crearlos.' : 'Ningún producto coincide con la búsqueda.' }}</div>
+    } @else {
+      <div class="cards">
+        @for (p of filtrados(); track p.id) {
+          <article class="item" [class.item--out]="p.stock === 0" [style.--tono]="tono(p.categoria)">
+            <div class="item__top">
+              <span class="item__initial" aria-hidden="true">{{ p.nombre.charAt(0).toUpperCase() }}</span>
+              <span class="item__cat">{{ p.categoria }}</span>
+            </div>
+            <h3>{{ p.nombre }}</h3>
+            <p class="item__desc">{{ p.descripcion }}</p>
+            <div class="item__price">
+              <strong>{{ p.precio | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</strong>
+              <span class="muted">{{ p.stock === 0 ? 'Sin stock' : p.stock + ' en stock' }}</span>
+            </div>
+            <button type="button" class="btn btn--sm btn--block" [disabled]="p.stock === 0" (click)="agregar(p)">+ Agregar</button>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  @if (auth.isAdmin()) {
+    <aside class="panel">
+      <h2>Nuevo producto</h2>
+      <p class="muted">Solo el rol Admin puede crear productos.</p>
+      <div class="field">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" [ngModel]="form().nombre" (ngModelChange)="actualizarCampo('nombre', $event)" />
+      </div>
+      <div class="field">
+        <label for="descripcion">Descripción</label>
+        <textarea id="descripcion" rows="2" [ngModel]="form().descripcion" (ngModelChange)="actualizarCampo('descripcion', $event)"></textarea>
+      </div>
+      <div class="field">
+        <label for="categoria">Categoría</label>
+        <input id="categoria" [ngModel]="form().categoria" (ngModelChange)="actualizarCampo('categoria', $event)" />
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="precio">Precio (CLP)</label>
+          <input id="precio" type="number" min="0" [ngModel]="form().precio" (ngModelChange)="actualizarCampo('precio', +$event)" />
+        </div>
+        <div class="field">
+          <label for="stock">Stock</label>
+          <input id="stock" type="number" min="0" [ngModel]="form().stock" (ngModelChange)="actualizarCampo('stock', +$event)" />
+        </div>
+      </div>
+      <button type="button" class="btn btn--block" [disabled]="guardando()" (click)="guardar()">Crear producto</button>
+    </aside>
+  }
+</div>

@@ -1,0 +1,16 @@
+.buscar { font: inherit; width: 240px; padding: 10px 16px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px;
+  &:focus { outline: none; border-color: var(--brand); } }
+.item {
+  --tono: 170;
+  display: flex; flex-direction: column; gap: 6px; padding: 18px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); transition: transform 0.15s;
+  &:hover { transform: translateY(-3px); }
+  &--out { opacity: 0.6; }
+  h3 { margin: 6px 0 0; }
+  &__top { display: flex; align-items: center; justify-content: space-between; }
+  &__initial { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; font-weight: 800; font-size: 1.2rem;
+    background: hsl(var(--tono) 65% 90%); color: hsl(var(--tono) 60% 28%); }
+  &__cat { padding: 3px 10px; font-size: 0.72rem; font-weight: 700; border-radius: 999px; background: hsl(var(--tono) 65% 92%); color: hsl(var(--tono) 60% 28%); }
+  &__desc { flex: 1; margin: 0; color: var(--muted); font-size: 0.88rem; }
+  &__price { display: flex; flex-direction: column; margin: 8px 0 6px; strong { font-size: 1.25rem; font-variant-numeric: tabular-nums; } }
+}

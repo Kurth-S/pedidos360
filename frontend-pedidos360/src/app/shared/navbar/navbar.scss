@@ -1,0 +1,46 @@
+:host { display: block; }
+.rail {
+  position: sticky; top: 0; height: 100vh;
+  display: flex; flex-direction: column; gap: 28px;
+  padding: 26px 16px 20px; background: #0d3b3f; color: #fff;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px; padding: 0 8px;
+  color: #fff; text-decoration: none; font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em;
+  em { font-style: normal; color: #7be0cf; }
+  &__mark {
+    display: grid; place-items: center; width: 38px; height: 38px;
+    border-radius: 12px; background: var(--accent); font-size: 0.8rem; font-weight: 800;
+  }
+}
+.menu {
+  display: flex; flex-direction: column; gap: 4px; flex: 1;
+  a {
+    display: flex; align-items: center; gap: 12px; padding: 11px 12px;
+    color: rgba(255,255,255,0.72); text-decoration: none; font-weight: 600; border-radius: 12px;
+    svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+    &:hover { color: #fff; background: rgba(255,255,255,0.08); }
+    &.on { color: #0d3b3f; background: #7be0cf; }
+  }
+}
+.count {
+  margin-left: auto; min-width: 22px; padding: 0 7px; text-align: center;
+  font-size: 0.75rem; color: #fff; background: var(--accent); border-radius: 999px;
+}
+.account {
+  display: flex; flex-direction: column; gap: 12px; padding: 14px;
+  background: rgba(255,255,255,0.07); border-radius: 14px;
+  &__hint { font-size: 0.85rem; color: rgba(255,255,255,0.7); }
+  &__who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  &__avatar { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #7be0cf; color: #0d3b3f; font-weight: 800; }
+  &__text { display: flex; flex-direction: column; min-width: 0; line-height: 1.2;
+    strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; }
+    small { color: #7be0cf; font-size: 0.75rem; } }
+}
+@media (max-width: 860px) {
+  .rail { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 16px; }
+  .menu { order: 3; flex: none; width: 100%; flex-direction: row; overflow-x: auto;
+    a { padding: 8px 12px; white-space: nowrap; } }
+  .account { flex-direction: row; align-items: center; margin-left: auto; padding: 6px 10px; }
+  .account__text { display: none; }
+}

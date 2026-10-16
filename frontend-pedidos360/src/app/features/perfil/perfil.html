@@ -1,0 +1,53 @@
+<div class="page-head">
+  <div>
+    <h1>Mi sesión</h1>
+    <p>Tokens emitidos por el IDaaS para {{ auth.displayName() }}.</p>
+  </div>
+  <div class="row">
+    <button type="button" class="btn btn--soft" [disabled]="ocupado()" (click)="renovarToken()">Renovar access token</button>
+    <button type="button" class="btn btn--soft" [disabled]="!auth.accessToken()" (click)="copiarToken()">Copiar access token</button>
+  </div>
+</div>
+
+@if (aviso()) { <div class="alert alert--info" role="status">{{ aviso() }}</div> }
+
+<section class="id-card panel">
+  <span class="id-card__avatar" aria-hidden="true">{{ auth.displayName().charAt(0).toUpperCase() }}</span>
+  <div>
+    <h2>{{ auth.displayName() }}</h2>
+    <p class="muted">{{ auth.email() }}</p>
+    <div class="row">
+      @for (r of auth.roles(); track r) { <span class="badge badge--rol">rol: {{ r }}</span> }
+      @if (auth.roles().length === 0) { <span class="badge">sin app role (Cliente)</span> }
+      @for (s of auth.scopes(); track s) { <span class="badge badge--ok">scope: {{ s }}</span> }
+    </div>
+  </div>
+</section>
+
+<div class="tabs" role="tablist">
+  <button type="button" role="tab" [class.on]="pestana() === 'resumen'" (click)="pestana.set('resumen')">Resumen</button>
+  <button type="button" role="tab" [class.on]="pestana() === 'id'" (click)="pestana.set('id')">ID token</button>
+  <button type="button" role="tab" [class.on]="pestana() === 'access'" (click)="pestana.set('access')">Access token</button>
+</div>
+
+<section class="panel">
+  @switch (pestana()) {
+    @case ('resumen') {
+      <dl class="kv">
+        @for (c of claimsDestacados(); track c.nombre) { <div><dt>{{ c.nombre }}</dt><dd class="mono">{{ c.valor || '—' }}</dd></div> }
+      </dl>
+    }
+    @case ('id') {
+      <p class="muted">Emitido por el flujo de usuario del tenant (OpenID Connect).</p>
+      <dl class="kv">
+        @for (c of claimsId(); track c.clave) { <div><dt>{{ c.clave }}</dt><dd class="mono">{{ c.valor }}</dd></div> }
+      </dl>
+    }
+    @case ('access') {
+      <p class="muted">Es el JWT que MsalInterceptor adjunta en cada llamada al API Gateway.</p>
+      <dl class="kv">
+        @for (c of claimsAccess(); track c.clave) { <div><dt>{{ c.clave }}</dt><dd class="mono">{{ c.valor }}</dd></div> }
+      </dl>
+    }
+  }
+</section>

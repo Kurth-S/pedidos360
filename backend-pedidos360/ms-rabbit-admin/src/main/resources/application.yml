@@ -1,0 +1,23 @@
+server:
+  port: ${SERVER_PORT:8083}
+
+spring:
+  application:
+    name: ms-rabbit-admin
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASSWORD:guest}
+    connection-timeout: 3s
+
+pedidos360:
+  security:
+    issuer: ${JWT_ISSUER:https://REEMPLAZAR-TENANT-ID.ciamlogin.com/REEMPLAZAR-TENANT-ID/v2.0}
+    jwk-set-uri: ${JWT_JWKS_URI:https://REEMPLAZAR-SUBDOMINIO.ciamlogin.com/REEMPLAZAR-TENANT-ID/discovery/v2.0/keys}
+    audiences: ${JWT_AUDIENCE:REEMPLAZAR-CLIENT-ID-API}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+    roles-claim: ${JWT_ROLES_CLAIM:roles}
+  rabbit-admin:
+    # API HTTP del plugin de administración de RabbitMQ (solo para listar colas)
+    management-url: ${RABBIT_MANAGEMENT_URL:http://localhost:15672}

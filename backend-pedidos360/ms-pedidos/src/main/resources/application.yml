@@ -13,6 +13,18 @@ spring:
     hibernate:
       ddl-auto: ${DB_DDL_AUTO:update}
     open-in-view: false
+  # Conexión al broker RabbitMQ
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASSWORD:guest}
+    connection-timeout: 3s
+    listener:
+      simple:
+        acknowledge-mode: manual        # cada consumidor hace ACK/NACK explícito
+        prefetch: 5
+        default-requeue-rejected: false # un rechazo va a la DLQ, no vuelve a la cola
 
 pedidos360:
   security:
@@ -25,3 +37,21 @@ pedidos360:
   clients:
     # URL interna de ms-productos (en EC2: http://localhost:8081)
     productos-url: ${PRODUCTOS_URL:http://localhost:8081}
+  # Nombres de exchanges, colas y routing keys: ÚNICO lugar donde se escriben.
+  # La clase RabbitTopologyConfig los lee y declara los beans Queue/Exchange/Binding.
+  rabbit:
+    exchange: pedidos360.eventos
+    dead-letter-exchange: pedidos360.eventos.dlx
+    routing-keys:
+      pedido-creado: pedido.creado
+      stock-bajo: inventario.stock-bajo
+    queues:
+      notificaciones:
+        name: notificaciones.pedido-creado.q
+        dlq: notificaciones.pedido-creado.dlq
+      tickets:
+        name: tickets.pedido-creado.q
+        dlq: tickets.pedido-creado.dlq
+      alertas-stock:
+        name: notificaciones.stock-bajo.q
+        dlq: notificaciones.stock-bajo.dlq

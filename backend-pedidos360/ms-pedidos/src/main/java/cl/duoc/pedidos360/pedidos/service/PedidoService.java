@@ -2,6 +2,8 @@ package cl.duoc.pedidos360.pedidos.service;
 
 import cl.duoc.pedidos360.common.BusinessException;
 import cl.duoc.pedidos360.common.ResourceNotFoundException;
+import cl.duoc.pedidos360.messaging.event.PedidoCreadoEvent;
+import cl.duoc.pedidos360.messaging.producer.PedidoEventPublisher;
 import cl.duoc.pedidos360.pedidos.client.ProductoDto;
 import cl.duoc.pedidos360.pedidos.client.ProductosClient;
 import cl.duoc.pedidos360.pedidos.dto.CrearPedidoRequest;
@@ -29,11 +31,14 @@ public class PedidoService {
   private final PedidoRepository repository;
   private final ProductosClient productosClient;
   private final SecurityProperties securityProps;
+  private final PedidoEventPublisher eventPublisher;
 
-  public PedidoService(PedidoRepository repository, ProductosClient productosClient, SecurityProperties securityProps) {
+  public PedidoService(PedidoRepository repository, ProductosClient productosClient,
+                       SecurityProperties securityProps, PedidoEventPublisher eventPublisher) {
     this.repository = repository;
     this.productosClient = productosClient;
     this.securityProps = securityProps;
+    this.eventPublisher = eventPublisher;
   }
 
   /**
@@ -71,6 +76,8 @@ public class PedidoService {
     Pedido guardado = repository.save(pedido);
     log.info("Pedido {} creado por {} ({} ítems, total {})", guardado.getId(), pedido.getClienteEmail(),
         pedido.getItems().size(), total);
+    // Mensajería asíncrona: notificaciones, ticket e inventario se procesan fuera de esta petición
+    eventPublisher.publicarPedidoCreado(PedidoCreadoEvent.de(guardado));
     return PedidoResponse.de(guardado);
   }
 

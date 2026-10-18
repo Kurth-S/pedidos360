@@ -13,6 +13,18 @@ spring:
     hibernate:
       ddl-auto: ${DB_DDL_AUTO:update}
     open-in-view: false
+  # Conexión al broker RabbitMQ
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER:guest}
+    password: ${RABBIT_PASSWORD:guest}
+    connection-timeout: 3s
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 5
+        default-requeue-rejected: false
 
 pedidos360:
   security:
@@ -22,3 +34,17 @@ pedidos360:
     audiences: ${JWT_AUDIENCE:REEMPLAZAR-CLIENT-ID-API}
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
     roles-claim: ${JWT_ROLES_CLAIM:roles}
+  inventario:
+    # Si el stock de un producto pedido es <= a este valor, se publica un evento de stock bajo
+    umbral-stock-bajo: ${STOCK_BAJO_UMBRAL:5}
+  # Nombres de exchanges, colas y routing keys: ÚNICO lugar donde se escriben.
+  rabbit:
+    exchange: pedidos360.eventos
+    dead-letter-exchange: pedidos360.eventos.dlx
+    routing-keys:
+      pedido-creado: pedido.creado
+      stock-bajo: inventario.stock-bajo
+    queues:
+      inventario:
+        name: inventario.pedido-creado.q
+        dlq: inventario.pedido-creado.dlq

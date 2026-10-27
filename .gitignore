@@ -4,3 +4,6 @@
 .env
 *.bak
 *.save
+.env
+*.bak
+*.save

@@ -54,7 +54,7 @@ public class RabbitTopologyConfig {
 
   @Bean
   Queue notificacionesDlq() {
-    return QueueBuilder.durable(props.queues().notificaciones().dlq()).build();
+    return QueueBuilder.durable(props.queues().notificaciones().dlq()).quorum().build();
   }
 
   @Bean
@@ -76,7 +76,7 @@ public class RabbitTopologyConfig {
 
   @Bean
   Queue ticketsDlq() {
-    return QueueBuilder.durable(props.queues().tickets().dlq()).build();
+    return QueueBuilder.durable(props.queues().tickets().dlq()).quorum().build();
   }
 
   @Bean
@@ -98,7 +98,7 @@ public class RabbitTopologyConfig {
 
   @Bean
   Queue alertasStockDlq() {
-    return QueueBuilder.durable(props.queues().alertasStock().dlq()).build();
+    return QueueBuilder.durable(props.queues().alertasStock().dlq()).quorum().build();
   }
 
   @Bean
@@ -116,6 +116,7 @@ public class RabbitTopologyConfig {
     return QueueBuilder.durable(nombres.name())
         .deadLetterExchange(props.deadLetterExchange())
         .deadLetterRoutingKey(nombres.dlq())
+        .quorum()
         .build();
   }
 }

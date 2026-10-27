@@ -45,12 +45,13 @@ public class RabbitTopologyConfig {
     return QueueBuilder.durable(props.queues().inventario().name())
         .deadLetterExchange(props.deadLetterExchange())
         .deadLetterRoutingKey(props.queues().inventario().dlq())
+        .quorum()
         .build();
   }
 
   @Bean
   Queue inventarioDlq() {
-    return QueueBuilder.durable(props.queues().inventario().dlq()).build();
+    return QueueBuilder.durable(props.queues().inventario().dlq()).quorum().build();
   }
 
   @Bean

@@ -1,0 +1,59 @@
+server:
+  port: ${SERVER_PORT:8084}
+
+spring:
+  application:
+    name: ms-kafka-admin
+
+pedidos360:
+  security:
+    issuer: ${JWT_ISSUER:https://REEMPLAZAR-TENANT-ID.ciamlogin.com/REEMPLAZAR-TENANT-ID/v2.0}
+    jwk-set-uri: ${JWT_JWKS_URI:https://REEMPLAZAR-SUBDOMINIO.ciamlogin.com/REEMPLAZAR-TENANT-ID/discovery/v2.0/keys}
+    audiences: ${JWT_AUDIENCE:REEMPLAZAR-CLIENT-ID-API}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+    roles-claim: ${JWT_ROLES_CLAIM:roles}
+
+  kafka-admin:
+    # Brokers del clúster levantado con docker-compose.kafka.yml (puertos externos 9092, 9093 y 9094)
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092,localhost:9093,localhost:9094}
+    request-timeout-ms: 10000
+    # Al iniciar, crea (o alinea) los tópicos de abajo. Es idempotente.
+    bootstrap-topics: ${KAFKA_BOOTSTRAP_TOPICS:true}
+    # Parámetros de administración de cada tópico: particiones, factor de replicación, retención y cleanup policy.
+    topics:
+      # Flujo 1 — hechos de negocio: un evento por pedido. Log inmutable con retención de 7 días.
+      - name: pedidos360.pedidos.eventos
+        partitions: 3
+        replication-factor: 3
+        configs:
+          "[cleanup.policy]": "delete"
+          "[retention.ms]": "604800000"        # 7 días
+          "[min.insync.replicas]": "2"         # con acks=all se necesitan 2 réplicas al día
+          "[max.message.bytes]": "1048576"
+          "[compression.type]": "producer"
+      # Flujo 2 — estado de inventario: lo que importa es el último stock de cada producto (clave = productoId).
+      # compact,delete conserva el último valor por clave y además elimina lo anterior a 3 días.
+      - name: pedidos360.inventario.eventos
+        partitions: 3
+        replication-factor: 3
+        configs:
+          "[cleanup.policy]": "compact,delete"
+          "[retention.ms]": "259200000"        # 3 días
+          "[min.insync.replicas]": "2"
+          "[max.message.bytes]": "1048576"
+          "[delete.retention.ms]": "86400000"  # 1 día para los tombstones
+      # Dead Letter Topics: aquí caen los mensajes inválidos o que agotaron sus reintentos. 14 días para revisarlos.
+      - name: pedidos360.pedidos.eventos.DLT
+        partitions: 1
+        replication-factor: 3
+        configs:
+          "[cleanup.policy]": "delete"
+          "[retention.ms]": "1209600000"       # 14 días
+          "[min.insync.replicas]": "2"
+      - name: pedidos360.inventario.eventos.DLT
+        partitions: 1
+        replication-factor: 3
+        configs:
+          "[cleanup.policy]": "delete"
+          "[retention.ms]": "1209600000"
+          "[min.insync.replicas]": "2"

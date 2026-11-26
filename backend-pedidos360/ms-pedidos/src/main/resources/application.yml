@@ -25,6 +25,9 @@ spring:
         acknowledge-mode: manual        # cada consumidor hace ACK/NACK explícito
         prefetch: 5
         default-requeue-rejected: false # un rechazo va a la DLQ, no vuelve a la cola
+  # Brokers Kafka (mismo valor que pedidos360.kafka.bootstrap-servers)
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092,localhost:9093,localhost:9094}
 
 pedidos360:
   security:
@@ -55,3 +58,20 @@ pedidos360:
       alertas-stock:
         name: notificaciones.stock-bajo.q
         dlq: notificaciones.stock-bajo.dlq
+
+  # Cliente Kafka del productor (la clase KafkaClientConfig los lee; KafkaSettings es la única fuente)
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092,localhost:9093,localhost:9094}
+    topics:
+      pedidos-eventos: pedidos360.pedidos.eventos
+      inventario-eventos: pedidos360.inventario.eventos
+      dlt-suffix: .DLT
+    producer:
+      acks: all                    # confirma con todas las réplicas sincronizadas
+      idempotence: true            # los reintentos no duplican mensajes
+      retries: 5
+      max-block-ms: 3000           # si Kafka no responde, no se bloquea la creación del pedido
+      request-timeout-ms: 5000
+      delivery-timeout-ms: 15000
+      linger-ms: 5
+      compression: lz4

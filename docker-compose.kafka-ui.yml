@@ -1,0 +1,33 @@
+# Kafka UI: panel web para ver brokers, tópicos, particiones, consumer groups, lag y mensajes (incluidas las DLT).
+#
+#   1) Levanta primero el clúster:  docker compose -f docker-compose.kafka.yml up -d
+#   2) Luego la interfaz:           docker compose -f docker-compose.kafka-ui.yml up -d
+#   3) Abre http://localhost:8090   (en la EC2: abre el puerto 8090 en el security group SOLO para tu IP)
+#
+# Usuario y contraseña: variables KAFKA_UI_USER y KAFKA_UI_PASSWORD (archivo .env). No dejes el panel público sin clave.
+
+name: pedidos360-kafka-ui
+
+services:
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    restart: unless-stopped
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: pedidos360
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:29092,kafka2:29092,kafka3:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      DYNAMIC_CONFIG_ENABLED: "true"
+      AUTH_TYPE: LOGIN_FORM
+      SPRING_SECURITY_USER_NAME: ${KAFKA_UI_USER:-admin}
+      SPRING_SECURITY_USER_PASSWORD: ${KAFKA_UI_PASSWORD:?Define KAFKA_UI_PASSWORD en el archivo .env}
+      JAVA_OPTS: "-Xms128m -Xmx384m"
+    networks:
+      - pedidos360-net
+
+networks:
+  pedidos360-net:
+    external: true
+    name: pedidos360-net

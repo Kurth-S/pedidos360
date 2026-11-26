@@ -13,6 +13,8 @@ import cl.duoc.pedidos360.pedidos.model.PedidoItem;
 import cl.duoc.pedidos360.pedidos.repository.PedidoRepository;
 import cl.duoc.pedidos360.security.JwtUtils;
 import cl.duoc.pedidos360.security.SecurityProperties;
+import cl.duoc.pedidos360.streaming.event.PedidoEventoDto;
+import cl.duoc.pedidos360.streaming.producer.PedidoKafkaPublisher;
 import java.math.BigDecimal;
 import java.util.List;
 import org.slf4j.Logger;
@@ -32,13 +34,16 @@ public class PedidoService {
   private final ProductosClient productosClient;
   private final SecurityProperties securityProps;
   private final PedidoEventPublisher eventPublisher;
+  private final PedidoKafkaPublisher kafkaPublisher;
 
   public PedidoService(PedidoRepository repository, ProductosClient productosClient,
-                       SecurityProperties securityProps, PedidoEventPublisher eventPublisher) {
+                       SecurityProperties securityProps, PedidoEventPublisher eventPublisher,
+                       PedidoKafkaPublisher kafkaPublisher) {
     this.repository = repository;
     this.productosClient = productosClient;
     this.securityProps = securityProps;
     this.eventPublisher = eventPublisher;
+    this.kafkaPublisher = kafkaPublisher;
   }
 
   /**
@@ -78,6 +83,8 @@ public class PedidoService {
         pedido.getItems().size(), total);
     // Mensajería asíncrona: notificaciones, ticket e inventario se procesan fuera de esta petición
     eventPublisher.publicarPedidoCreado(PedidoCreadoEvent.de(guardado));
+    // Streaming de eventos (Kafka): registro de hechos para analítica; independiente de RabbitMQ
+    kafkaPublisher.publicarPedidoCreado(PedidoEventoDto.creado(guardado));
     return PedidoResponse.de(guardado);
   }
 

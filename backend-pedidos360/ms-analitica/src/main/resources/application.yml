@@ -1,0 +1,52 @@
+server:
+  port: ${SERVER_PORT:8085}
+
+spring:
+  application:
+    name: ms-analitica
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092,localhost:9093,localhost:9094}
+
+pedidos360:
+  security:
+    issuer: ${JWT_ISSUER:https://REEMPLAZAR-TENANT-ID.ciamlogin.com/REEMPLAZAR-TENANT-ID/v2.0}
+    jwk-set-uri: ${JWT_JWKS_URI:https://REEMPLAZAR-SUBDOMINIO.ciamlogin.com/REEMPLAZAR-TENANT-ID/discovery/v2.0/keys}
+    audiences: ${JWT_AUDIENCE:REEMPLAZAR-CLIENT-ID-API}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
+    roles-claim: ${JWT_ROLES_CLAIM:roles}
+
+  analitica:
+    # true: al recibir sus particiones vuelve al inicio del tópico y reconstruye los indicadores (el almacén es idempotente)
+    reconstruir-al-iniciar: ${ANALITICA_RECONSTRUIR:true}
+
+  # Cliente Kafka del consumidor. KafkaSettings es la única fuente de estos valores.
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092,localhost:9093,localhost:9094}
+    topics:
+      pedidos-eventos: pedidos360.pedidos.eventos
+      inventario-eventos: pedidos360.inventario.eventos
+      dlt-suffix: .DLT
+    groups:
+      analitica-ventas: analitica.ventas            # lee TODOS los pedidos (independiente de ms-productos)
+      analitica-inventario: analitica.inventario    # lee TODOS los eventos de inventario
+    producer:                                       # solo se usa para publicar en las DLT
+      acks: all
+      idempotence: true
+      retries: 5
+      max-block-ms: 3000
+      request-timeout-ms: 5000
+      delivery-timeout-ms: 15000
+      linger-ms: 5
+      compression: lz4
+    consumer:
+      auto-offset-reset: earliest
+      max-poll-records: 50
+      max-poll-interval-ms: 300000
+      session-timeout-ms: 30000
+      heartbeat-interval-ms: 10000
+      concurrency: 3
+    retry:
+      max-attempts: 3
+      initial-interval-ms: 500
+      multiplier: 2.0
+      max-interval-ms: 5000

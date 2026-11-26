@@ -25,6 +25,9 @@ spring:
         acknowledge-mode: manual
         prefetch: 5
         default-requeue-rejected: false
+  # Brokers Kafka (mismo valor que pedidos360.kafka.bootstrap-servers)
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092,localhost:9093,localhost:9094}
 
 pedidos360:
   security:
@@ -48,3 +51,34 @@ pedidos360:
       inventario:
         name: inventario.pedido-creado.q
         dlq: inventario.pedido-creado.dlq
+
+  # Cliente Kafka: productor (tópico de inventario) y consumidor (tópico de pedidos). KafkaSettings es la única fuente.
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092,localhost:9093,localhost:9094}
+    topics:
+      pedidos-eventos: pedidos360.pedidos.eventos
+      inventario-eventos: pedidos360.inventario.eventos
+      dlt-suffix: .DLT
+    groups:
+      inventario-demanda: productos.inventario-demanda   # este servicio lee TODOS los pedidos con su propio group
+    producer:
+      acks: all
+      idempotence: true
+      retries: 5
+      max-block-ms: 3000
+      request-timeout-ms: 5000
+      delivery-timeout-ms: 15000
+      linger-ms: 5
+      compression: lz4
+    consumer:
+      auto-offset-reset: earliest   # un grupo nuevo empieza desde el primer mensaje retenido
+      max-poll-records: 50
+      max-poll-interval-ms: 300000
+      session-timeout-ms: 30000
+      heartbeat-interval-ms: 10000
+      concurrency: 3                # 3 hilos = 1 por partición del tópico de pedidos
+    retry:
+      max-attempts: 3               # reintentos antes de enviar a la DLT
+      initial-interval-ms: 500
+      multiplier: 2.0
+      max-interval-ms: 5000

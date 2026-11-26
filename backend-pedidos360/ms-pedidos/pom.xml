@@ -38,6 +38,12 @@
       <artifactId>spring-boot-starter-amqp</artifactId>
     </dependency>
 
+    <!-- Streaming de eventos: Apache Kafka (Spring for Apache Kafka) -->
+    <dependency>
+      <groupId>org.springframework.kafka</groupId>
+      <artifactId>spring-kafka</artifactId>
+    </dependency>
+
     <!-- Seguridad: Resource Server valida el JWT del IDaaS (firma, issuer, audience, expiración) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
